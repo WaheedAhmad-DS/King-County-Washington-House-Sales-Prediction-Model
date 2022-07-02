@@ -188,9 +188,46 @@ The modeling phase can be summarized in the following steps:
 * **Model Development:** The model was fitted using the data we cleaned. 
 * **Model Assessment:**  Models were assessed using various statistical techniques.                                              
 
-**1) Linear Regression**                                                                                                      
+**1) Linear Regression**    
 
-**2) Multiple Linear regression**                                                               
+A sqft_living has the highest positive correlation with price, we will built the linear model based on sqft_living. The cod snippet is below: 
+
+```
+lm=LinearRegression()
+X=df[['sqft_living']]
+Y=df[['price']]
+lm.fit(X,Y) 
+```
+```
+lm.intercept_ 
+       
+       array([-43580.74309447]) 
+lm.coef_             
+
+       array([[280.6235679]]) 
+```
+
+* The linear model comes out to be  ***price=-43580.74309447+ 280.6235679*sqft_living***. This is called slope-intercept form in mathematical terms. 
+
+**2) Multiple Linear regression**   
+
+```
+Z=df[["floors", "waterfront", "lat", "bedrooms", "sqft_basement", "view", "bathrooms", "sqft_living15",
+      "sqft_above", "grade", "sqft_living"]]
+A=df[['price']]
+lm.fit(Z, A)
+print (lm.intercept_)
+print (lm.coef_)  
+```
+
+```
+[-32382535.85823347]
+[[-2.98936449e+04  6.01930234e+05  6.72855361e+05 -2.59783985e+04
+  -4.73564581e+14  6.70908533e+04 -3.26565588e+03  4.54356111e+00
+  -4.73564581e+14  8.20151586e+04  4.73564581e+14]]
+```
+
+
 
 **2) Polynomial Features and pipeline building**  
 
