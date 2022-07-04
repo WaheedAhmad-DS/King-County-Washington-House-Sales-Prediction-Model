@@ -207,7 +207,7 @@ lm.coef_
        array([[280.6235679]]) 
 ```
 
-* The linear model comes out to be  ***price=-43580.74309447+ 280.6235679*sqft_living***. This is called slope-intercept form in mathematical terms. 
+* The linear model comes out to be  ***price=-43580.74309447+ 280.6235679(sqft_living)***. This is called slope-intercept form in mathematical terms i.e **y=a+bx** where b is the slope and a is the intercept. 
 
 **2) Multiple Linear regression**   
 
@@ -227,19 +227,122 @@ print (lm.coef_)
   -4.73564581e+14  8.20151586e+04  4.73564581e+14]]
 ```
 
+* The multiple linear regression model comes out to be as follows:
+***price= -32382535.85823347 - 2.98936449e+04(floors) + 6.01930234e+05(waterfront) + 6.72855361e+05(lat) - 2.59783985e+04(bedrooms) - 4.73564581e+14(sqft_basement) + 6.70908533e+04(view) - 3.26565588e+03(bathrooms) + 4.54356111e+00(sqft_living15) - 4.73564581e+14(sqft_above) + 8.20151586e+04(grade) + 4.73564581e+14(sqft_living)***
 
+In mathematical equation terms: 
 
-**2) Polynomial Features and pipeline building**  
+**y=a + b1X1 + b2X2+.......**
 
-**3) Ridge Regression**                                                                                   
+**3) Polynomial Features and pipeline building**  
 
+```
+Input=[ ('scale',StandardScaler() ), ('polynomial', PolynomialFeatures(include_bias=False)), 
+       ('model', LinearRegression())
+]
+```
+
+```
+pipe=Pipeline(Input)
+```
+
+```
+pipe.fit(Z,A)
+
+    Pipeline(steps=[('scale', StandardScaler()),
+                ('polynomial', PolynomialFeatures(include_bias=False)),
+                ('model', LinearRegression())])
+```
+```
+ypipe=pipe.predict(Z)
+ypipe[0:4]
+        array([[349612.125],
+       [559160.125],
+       [449828.125],
+       [393276.125]])
+```
+
+**4) Ridge Regression**                                                                                   
+```
+#Splitting into train and test data.
+features =["floors", "waterfront","lat" ,"bedrooms" ,"sqft_basement" ,"view" ,
+           "bathrooms","sqft_living15","sqft_above","grade","sqft_living"]    
+X = df[features]
+Y = df['price']
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.15, random_state=1)
+print("number of test samples:", x_test.shape[0])
+print("number of training samples:",x_train.shape[0])
+             number of test samples: 3242
+             number of training samples: 18371
+```
+```
+RigeModel=Ridge(alpha=0.1)
+```
+```
+RigeModel.fit(x_train, y_train) 
+```
+```
+print('predicted:', yhat[0:4])
+print('test set :', y_test[0:4].values)
+             predicted: [651781.17964158 514958.12791319 794388.65874944 702639.20038572]
+             test set : [ 459000.  445000. 1057000.  732350.]
+```
 
 [(Back to top)](#table-of-contents)  
 
 ### 5.Evaluation
 **Technical Evaluation**                        
+**1) Linear Regression**
+```
+# Evaluation
+r_squared = lm.score(X, Y)
+print (r_squared)   
+       0.4928532179037931
+```
+* **This means 49.28 % of the variation in price can be explained by sqft_living.**
+* So not a good model. Let's move on to next model's evaluation. 
 
-Technical evaluations of the models have been done above where we found the accuracy measurements regarding all the four models.                         
+**2) Multiple Linear regression**
+
+```
+# Evaluation
+lm.score(Z,A) 
+      0.6576885711683069
+```
+* **This means our model fits 65.76 % and it is comparatively better fit than above linear regression model.**
+
+**3) Polynomial Features and pipeline building** 
+
+```
+pipe.score(Z, A)
+      0.7513387707402615
+```
+
+* **R squared is 75.13 % and is better than multiple linear regression model above.**
+
+**4) Ridge Regression** 
+```
+test_score, train_score   
+       (0.6478759163939118, 0.6594378534950245)
+```
+
+* Let's see r-squared for different values of alpha through the plot. 
+
+![alt text](https://github.com/WaheedAhmad-DS/King-County-Washington-House-Sales-Prediction-Model/blob/main/Images/R2%20and%20alpha.png) 
+
+```
+pr=PolynomialFeatures(degree=2)
+x_train_pr=pr.fit_transform(x_train[["floors", "waterfront","lat" ,"bedrooms" ,"sqft_basement" ,"view" ,
+                                     "bathrooms","sqft_living15","sqft_above","grade","sqft_living"]])
+x_test_pr=pr.fit_transform(x_test[["floors", "waterfront","lat" ,"bedrooms" ,"sqft_basement" ,"view" ,
+                                   "bathrooms","sqft_living15","sqft_above","grade","sqft_living"]])
+```
+```
+RigeModel.score(x_test_pr, y_test) 
+            0.7666545737095763
+```
+
+* **Ridge regression with polynomial features of degree= 2 and with alpha= 0.1 gives R-squared= 76.66 %. And it seems to be the best model of all.**
 
 **Non-technical Evaluation**                                                                                               
 
@@ -277,7 +380,7 @@ Technical evaluation of our Ridge regression model is near to accurate. But eval
 
 * Price increase with increase in Grade and Condition.
 
-* Price prediction model was developed with more than 75 % accuracy, and the model can be deployed dependig upon the interests. 
+* Price prediction model was developed with more than 75 % accuracy, and the model can be deployed depending upon the interests. 
   
 [(Back to top)](#table-of-contents)  
 ***
